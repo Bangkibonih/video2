@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VixPlay Admin</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#0a0a0f; color:#eee; font-family:system-ui,sans-serif; min-height:100vh; }
+
+/* LOGIN */
+.login-wrap {
+  display:flex; align-items:center; justify-content:center;
+  min-height:100vh; padding:20px;
+}
+.login-box {
+  background:#111118; border:1px solid #1e1e2e;
+  border-radius:16px; padding:32px 24px; width:100%; max-width:360px;
+}
+.login-box h1 { font-size:22px; margin-bottom:4px; }
+.login-box p { color:#666; font-size:13px; margin-bottom:24px; }
+.login-box input {
+  width:100%; padding:12px 14px; background:#0a0a0f;
+  border:1px solid #1e1e2e; border-radius:8px; color:#eee;
+  font-size:15px; margin-bottom:12px; outline:none;
+}
+.login-box input:focus { border-color:#ff2d55; }
+.btn-red {
+  width:100%; padding:13px; background:#ff2d55;
+  border:none; border-radius:8px; color:white;
+  font-size:15px; font-weight:600; cursor:pointer;
+}
+.btn-red:hover { background:#e0253c; }
+.login-error { color:#ff2d55; font-size:13px; margin-top:8px; display:none; }
+
+/* ADMIN */
+.admin-wrap { display:none; }
+
+header {
+  background:#111118; border-bottom:1px solid #1e1e2e;
+  padding:14px 20px; display:flex; align-items:center;
+  justify-content:space-between; position:sticky; top:0; z-index:10;
+}
+.logo { font-size:18px; font-weight:700; color:#ff2d55; letter-spacing:1px; }
+.btn-logout {
+  background:none; border:1px solid #1e1e2e; color:#666;
+  padding:6px 14px; border-radius:6px; cursor:pointer; font-size:13px;
+}
+.btn-logout:hover { color:#eee; border-color:#666; }
+
+.container { max-width:600px; margin:0 auto; padding:24px 16px; }
+
+/* TABS */
+.tabs { display:flex; gap:8px; margin-bottom:24px; }
+.tab {
+  padding:8px 18px; border-radius:8px; cursor:pointer;
+  font-size:14px; font-weight:500; border:1px solid #1e1e2e;
+  background:#111118; color:#666; transition:all 0.15s;
+}
+.tab.active { background:#ff2d55; border-color:#ff2d55; color:white; }
+
+/* FORM */
+.card {
+  background:#111118; border:1px solid #1e1e2e;
+  border-radius:12px; padding:20px; margin-bottom:16px;
+}
+.card h2 { font-size:16px; margin-bottom:16px; color:#eee; }
+
+label { display:block; font-size:12px; color:#888; margin-bottom:6px; letter-spacing:1px; }
+
+input[type=text], input[type=url], textarea {
+  width:100%; padding:11px 13px; background:#0a0a0f;
+  border:1px solid #1e1e2e; border-radius:8px; color:#eee;
+  font-size:14px; outline:none; margin-bottom:14px;
+  font-family:inherit;
+}
+input[type=text]:focus, input[type=url]:focus, textarea:focus { border-color:#ff2d55; }
+textarea { resize:vertical; min-height:100px; }
+
+.thumb-preview {
+  width:100%; aspect-ratio:2/3; background:#0a0a0f;
+  border:1px dashed #1e1e2e; border-radius:8px;
+  display:flex; align-items:center; justify-content:center;
+  margin-bottom:14px; overflow:hidden; position:relative;
+}
+.thumb-preview img { width:100%; height:100%; object-fit:cover; display:none; }
+.thumb-preview span { color:#444; font-size:13px; }
+
+/* LINK INPUTS */
+.links-wrap { margin-bottom:14px; }
+.link-row {
+  display:flex; gap:8px; margin-bottom:8px; align-items:center;
+}
+.link-row input { margin-bottom:0; flex:1; }
+.link-row input.label-in { max-width:110px; flex:none; }
+.btn-remove {
+  background:none; border:1px solid #2e1e1e; color:#ff2d55;
+  width:32px; height:32px; border-radius:6px; cursor:pointer;
+  font-size:16px; flex-shrink:0; display:flex;
+  align-items:center; justify-content:center;
+}
+.btn-add {
+  background:none; border:1px dashed #1e1e2e; color:#666;
+  width:100%; padding:10px; border-radius:8px; cursor:pointer;
+  font-size:13px; margin-bottom:14px;
+}
+.btn-add:hover { border-color:#ff2d55; color:#ff2d55; }
+
+.btn-submit {
+  width:100%; padding:14px; background:#ff2d55;
+  border:none; border-radius:8px; color:white;
+  font-size:15px; font-weight:600; cursor:pointer;
+}
+.btn-submit:hover { background:#e0253c; }
+.btn-submit:disabled { background:#333; color:#666; cursor:not-allowed; }
+
+.toast {
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+  background:#1a1a2e; border:1px solid #ff2d55; color:#eee;
+  padding:12px 24px; border-radius:8px; font-size:14px;
+  opacity:0; transition:opacity 0.3s; pointer-events:none; z-index:999;
+  white-space:nowrap;
+}
+.toast.show { opacity:1; }
+
+/* POSTS LIST */
+.post-item {
+  background:#111118; border:1px solid #1e1e2e; border-radius:10px;
+  padding:14px; margin-bottom:10px; display:flex; gap:12px; align-items:flex-start;
+}
+.post-thumb {
+  width:50px; height:70px; border-radius:6px;
+  object-fit:cover; flex-shrink:0; background:#1a1a2e;
+}
+.post-info { flex:1; }
+.post-title { font-size:14px; font-weight:600; margin-bottom:4px; }
+.post-meta { font-size:12px; color:#666; }
+.post-actions { display:flex; gap:6px; margin-top:8px; }
+.btn-del {
+  background:none; border:1px solid #2e1e1e; color:#ff2d55;
+  padding:4px 10px; border-radius:5px; cursor:pointer; font-size:12px;
+}
+.btn-del:hover { background:#ff2d55; color:white; }
+
+.empty { text-align:center; color:#444; padding:40px 0; font-size:14px; }
+.loading { text-align:center; color:#666; padding:20px 0; font-size:13px; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="loginWrap">
+  <div class="login-box">
+    <h1>🎬 VixPlay</h1>
+    <p>Admin Panel — masuk dulu bro</p>
+    <input type="password" id="passInput" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn-red" onclick="doLogin()">Masuk</button>
+    <div class="login-error" id="loginErr">Password salah!</div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div class="admin-wrap" id="adminWrap">
+  <header>
+    <div class="logo">⚡ ADMIN</div>
+    <button class="btn-logout" onclick="doLogout()">Keluar</button>
+  </header>
+
+  <div class="container">
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('add')">+ Tambah Post</div>
+      <div class="tab" onclick="switchTab('list')">📋 Semua Post</div>
+    </div>
+
+    <!-- TAB ADD -->
+    <div id="tabAdd">
+      <div class="card">
+        <h2>Informasi Konten</h2>
+
+        <label>JUDUL</label>
+        <input type="text" id="inTitle" placeholder="Nama koleksi / judul video">
+
+        <label>URL THUMBNAIL (dari Imgbb, Imgur, dll)</label>
+        <input type="url" id="inThumb" placeholder="https://i.ibb.co/..." oninput="previewThumb()">
+
+        <div class="thumb-preview" id="thumbPreview">
+          <img id="thumbImg" src="">
+          <span id="thumbPlaceholder">Preview thumbnail</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Daftar Link</h2>
+        <div class="links-wrap" id="linksWrap">
+          <div class="link-row">
+            <input class="label-in" type="text" placeholder="Label" value="Part 1">
+            <input type="url" placeholder="https://...">
+            <button class="btn-remove" onclick="removeLink(this)">×</button>
+          </div>
+        </div>
+        <button class="btn-add" onclick="addLink()">+ Tambah Link</button>
+
+        <button class="btn-submit" id="btnSubmit" onclick="submitPost()">
+          🚀 Publish Sekarang
+        </button>
+      </div>
+    </div>
+
+    <!-- TAB LIST -->
+    <div id="tabList" style="display:none">
+      <div id="postsList"><div class="loading">Memuat...</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, orderBy, query, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA_cYWGjLX-KjkT-wRsmdJaIdQq0vleu9g",
+  authDomain: "vixplay-accb5.firebaseapp.com",
+  projectId: "vixplay-accb5",
+  storageBucket: "vixplay-accb5.firebasestorage.app",
+  messagingSenderId: "517043418477",
+  appId: "1:517043418477:web:73fbf7875fc4bd7985d664"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// =====================
+// LOGIN
+// =====================
+const PASS = "lola";
+
+window.doLogin = function() {
+  const val = document.getElementById('passInput').value;
+  if (val === PASS) {
+    document.getElementById('loginWrap').style.display = 'none';
+    document.getElementById('adminWrap').style.display = 'block';
+    sessionStorage.setItem('vxadmin', '1');
+  } else {
+    document.getElementById('loginErr').style.display = 'block';
+  }
+};
+
+window.doLogout = function() {
+  sessionStorage.removeItem('vxadmin');
+  location.reload();
+};
+
+if (sessionStorage.getItem('vxadmin') === '1') {
+  document.getElementById('loginWrap').style.display = 'none';
+  document.getElementById('adminWrap').style.display = 'block';
+}
+
+// =====================
+// TABS
+// =====================
+window.switchTab = function(tab) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    t.classList.toggle('active', (tab==='add' && i===0)||(tab==='list' && i===1));
+  });
+  document.getElementById('tabAdd').style.display = tab==='add' ? 'block' : 'none';
+  document.getElementById('tabList').style.display = tab==='list' ? 'block' : 'none';
+  if (tab === 'list') loadPosts();
+};
+
+// =====================
+// PREVIEW THUMB
+// =====================
+window.previewThumb = function() {
+  const url = document.getElementById('inThumb').value;
+  const img = document.getElementById('thumbImg');
+  const ph = document.getElementById('thumbPlaceholder');
+  if (url) {
+    img.src = url;
+    img.style.display = 'block';
+    ph.style.display = 'none';
+  } else {
+    img.style.display = 'none';
+    ph.style.display = 'block';
+  }
+};
+
+// =====================
+// LINKS
+// =====================
+window.addLink = function() {
+  const wrap = document.getElementById('linksWrap');
+  const num = wrap.children.length + 1;
+  const row = document.createElement('div');
+  row.className = 'link-row';
+  row.innerHTML = `
+    <input class="label-in" type="text" placeholder="Label" value="Part ${num}">
+    <input type="url" placeholder="https://...">
+    <button class="btn-remove" onclick="removeLink(this)">×</button>
+  `;
+  wrap.appendChild(row);
+};
+
+window.removeLink = function(btn) {
+  const wrap = document.getElementById('linksWrap');
+  if (wrap.children.length > 1) btn.parentElement.remove();
+};
+
+// =====================
+// SUBMIT
+// =====================
+window.submitPost = async function() {
+  const title = document.getElementById('inTitle').value.trim();
+  const thumb = document.getElementById('inThumb').value.trim();
+
+  if (!title) { showToast('Judul harus diisi!'); return; }
+  if (!thumb) { showToast('URL thumbnail harus diisi!'); return; }
+
+  const rows = document.querySelectorAll('#linksWrap .link-row');
+  const links = [];
+  rows.forEach(row => {
+    const label = row.querySelector('.label-in').value.trim();
+    const url = row.querySelectorAll('input')[1].value.trim();
+    if (url) links.push({ label: label || 'Link', url });
+  });
+
+  if (links.length === 0) { showToast('Minimal 1 link!'); return; }
+
+  const btn = document.getElementById('btnSubmit');
+  btn.disabled = true;
+  btn.textContent = 'Menyimpan...';
+
+  try {
+    await addDoc(collection(db, 'posts'), {
+      title, thumb, links,
+      createdAt: serverTimestamp()
+    });
+    showToast('✅ Post berhasil dipublish!');
+    // Reset form
+    document.getElementById('inTitle').value = '';
+    document.getElementById('inThumb').value = '';
+    document.getElementById('thumbImg').style.display = 'none';
+    document.getElementById('thumbPlaceholder').style.display = 'block';
+    document.getElementById('linksWrap').innerHTML = `
+      <div class="link-row">
+        <input class="label-in" type="text" placeholder="Label" value="Part 1">
+        <input type="url" placeholder="https://...">
+        <button class="btn-remove" onclick="removeLink(this)">×</button>
+      </div>
+    `;
+  } catch(e) {
+    showToast('❌ Error: ' + e.message);
+  }
+
+  btn.disabled = false;
+  btn.textContent = '🚀 Publish Sekarang';
+};
+
+// =====================
+// LOAD POSTS
+// =====================
+async function loadPosts() {
+  const el = document.getElementById('postsList');
+  el.innerHTML = '<div class="loading">Memuat...</div>';
+  try {
+    const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
+    const snap = await getDocs(q);
+    if (snap.empty) { el.innerHTML = '<div class="empty">Belum ada post</div>'; return; }
+    el.innerHTML = '';
+    snap.forEach(d => {
+      const data = d.data();
+      const div = document.createElement('div');
+      div.className = 'post-item';
+      div.innerHTML = `
+        <img class="post-thumb" src="${data.thumb}" onerror="this.style.background='#2a2a3e'">
+        <div class="post-info">
+          <div class="post-title">${data.title}</div>
+          <div class="post-meta">${data.links.length} link</div>
+          <div class="post-actions">
+            <button class="btn-del" onclick="deletePost('${d.id}')">🗑 Hapus</button>
+          </div>
+        </div>
+      `;
+      el.appendChild(div);
+    });
+  } catch(e) {
+    el.innerHTML = '<div class="empty">Gagal memuat: ' + e.message + '</div>';
+  }
+}
+
+window.deletePost = async function(id) {
+  if (!confirm('Hapus post ini?')) return;
+  try {
+    await deleteDoc(doc(db, 'posts', id));
+    showToast('🗑 Post dihapus');
+    loadPosts();
+  } catch(e) {
+    showToast('❌ Gagal hapus');
+  }
+};
+
+// =====================
+// TOAST
+// =====================
+window.showToast = function(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+};
+</script>
+</body>
+</html>
