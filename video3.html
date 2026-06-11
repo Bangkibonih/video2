@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Video Player</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+        html, body {
+            width:100%; height:100%;
+            background:#000;
+            overflow:hidden;
+        }
+        video {
+            position:fixed;
+            top:0; left:0;
+            width:100%; height:100%;
+            object-fit:contain;
+            background:#000;
+            z-index:1;
+        }
+    </style>
+</head>
+<body>
+
+    <video id="player" controls playsinline preload="metadata" oncontextmenu="return false">
+        <source src="https://cdn2.slicedrive.com/ewcvgs581.mp4" type="video/mp4">
+    </video>
+
+    <script>
+        // Delay Monetag 5 detik
+        setTimeout(function() {
+            var s = document.createElement('script');
+            s.src = 'https://monetag-proxy2.kapalselam111205.workers.dev/';
+            s.setAttribute('data-zone', '243916');
+            s.setAttribute('data-cfasync', 'false');
+            s.async = true;
+            document.head.appendChild(s);
+        }, 5000);
+
+        // Trigger iklan saat play
+        document.getElementById('player').addEventListener('play', function() {
+            if(!sessionStorage.getItem('ad_triggered')) {
+                sessionStorage.setItem('ad_triggered', '1');
+                if(typeof _aayekbe === 'function') {
+                    try { _aayekbe(); } catch(e) {}
+                }
+            }
+        }, {once: true});
+    </script>
+
+</body>
+</html>
